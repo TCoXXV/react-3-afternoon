@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-
+import axios from 'axios';
 import './App.css';
-
+import Post from './Post/Post'
 import Header from './Header/Header';
 import Compose from './Compose/Compose';
 
@@ -19,19 +19,38 @@ class App extends Component {
   }
   
   componentDidMount() {
+    axios.get("https://practiceapi.devmountain.com/api/posts").then(res => {
+      this.setState({
+          posts: res.data})
+        })
+      }
 
+  updatePost( id, text ) {
+    axios.put(`https://practiceapi.devmountain.com/api/posts?id=${ id }`, { text }).then(res => {
+      this.setState({
+          posts: res.data})
+        })
+      }
+
+  deletePost(id) {
+    axios.delete(`https://practiceapi.devmountain.com/api/posts?id=${ id }`).then(res => {
+      this.setState({
+          posts: res.data })
+        })
   }
 
-  updatePost() {
-  
+  createPost(text) {
+    axios.post(`https://practiceapi.devmountain.com/api/posts`, { text }).then(res => {
+      this.setState({
+          posts: res.data })
+        })
   }
-
-  deletePost() {
-
-  }
-
-  createPost() {
-
+  search(text) {
+    axios.get(`https://practiceapi.devmountain.com/api/posts/filter`, { text }).then(res => {
+      console.log(res.data)
+      this.setState({
+          posts: res.data })
+        })
   }
 
   render() {
@@ -39,12 +58,26 @@ class App extends Component {
 
     return (
       <div className="App__parent">
-        <Header />
+        <Header search={this.search}
+        />
 
         <section className="App__content">
 
-          <Compose />
+          <Compose createPostFn={ this.createPost }/>
           
+          {
+            posts.map( post => (
+              <Post text={post.text} 
+                    date={post.date} 
+                    key={ post.id } 
+                    id={ post.id }
+                    updatePostFn={ this.updatePost }
+                    deletePostFn={ this.deletePost }
+                    
+                    />
+            ))
+          }
+
         </section>
       </div>
     );
